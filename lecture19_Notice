@@ -1,0 +1,36 @@
+Hello everyone,
+
+In the next lesson if you notice any inconsistency in the LIB_GPIO_Init () function just know that the correct implementation of the function is as shown below.
+
+void LIB_GPIO_Init(GPIO_TypeDef  *GPIOx, GPIO_InitTypeDef *GPIO_Init){
+ 
+  uint32_t position;
+  uint32_t ioposition = 0x00U;
+  uint32_t iocurrent = 0x00U;
+  uint32_t temp = 0x00U;
+	
+	  /* Configure the port pins */
+  for(position = 0U; position < GPIO_NUMBER; position++)
+  {
+    /* Get the IO position */
+    ioposition = 0x01U << position;
+    /* Get the current IO position */
+    iocurrent = (uint32_t)(GPIO_Init->Pin) & ioposition;
+
+    if(iocurrent == ioposition)
+    {
+		      /* Configure IO Direction mode (Input, Output) */
+      temp = GPIOx->MODER;
+      temp &= ~(GPIO_MODER_MODER0 << (position * 2U));
+      temp |= ((GPIO_Init->Mode & GPIO_MODE) << (position * 2U));
+      GPIOx->MODER = temp;
+			
+		      /* Activate the Pull-up or Pull down resistor for the current IO */
+      temp = GPIOx->PUPDR;
+      temp &= ~(GPIO_PUPDR_PUPDR0 << (position * 2U));
+      temp |= ((GPIO_Init->Pull) << (position * 2U));
+      GPIOx->PUPDR = temp;
+		}
+		
+		}
+}
